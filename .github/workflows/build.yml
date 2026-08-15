@@ -1,0 +1,27 @@
+name: Build YODHAS Music Player APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Build with Buildozer Action
+      uses: ArtemSydoryk/buildozer-action@v1
+      with:
+        command: buildozer android debug
+        subfolder: .
+
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: yodhas-music-apk
+        path: bin/*.apk
+
