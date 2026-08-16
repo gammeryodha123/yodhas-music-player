@@ -149,8 +149,8 @@ class YodhasMusicApp(App):
             save_playlist(self.playlist)
             Clock.schedule_once(lambda dt: self.update_playlist_ui())
             Clock.schedule_once(lambda dt: setattr(self.now_playing, 'text', 'Added to playlist!'))
-        except Exception:
-            Clock.schedule_once(lambda dt: setattr(self.now_playing, 'text', 'Error loading song'))
+        except Exception as e:
+            Clock.schedule_once(lambda dt: setattr(self.now_playing, 'text', f'Error loading song: {str(e)[:50]}'))
 
     def _extract_details(self, url):
         ydl_opts = {'quiet': True}
@@ -187,8 +187,8 @@ class YodhasMusicApp(App):
                         self.now_playing.text = "Playback Error"
 
                 Clock.schedule_once(start_audio)
-        except Exception:
-            Clock.schedule_once(lambda dt: setattr(self.now_playing, 'text', 'Stream Error'))
+        except Exception as e:
+            Clock.schedule_once(lambda dt: setattr(self.now_playing, 'text', f'Stream Error: {str(e)[:50]}'))
 
     def next_song(self, instance=None):
         if self.current_index < len(self.playlist) - 1:
@@ -219,7 +219,7 @@ class YodhasMusicApp(App):
             url = f"https://lrclib.net/api/search?track_name={urllib.parse.quote(title)}"
             req = urllib.request.urlopen(url)
             data = json.loads(req.read().decode())
-            lyrics_text = data[0]['plainLyrics'] if data else "Lyrics not found"
+            lyrics_text = data[0]['plainLyrics'] if data and len(data) > 0 else "Lyrics not found"
         except Exception:
             lyrics_text = "Lyrics not found"
 
@@ -240,8 +240,8 @@ class YodhasMusicApp(App):
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 ydl.download([url])
             Clock.schedule_once(lambda dt: setattr(self.now_playing, 'text', 'Download Complete!'))
-        except Exception:
-            Clock.schedule_once(lambda dt: setattr(self.now_playing, 'text', 'Download Failed'))
+        except Exception as e:
+            Clock.schedule_once(lambda dt: setattr(self.now_playing, 'text', f'Download Failed: {str(e)[:50]}'))
 
     def clear_playlist(self, instance):
         self.playlist = []
@@ -253,4 +253,3 @@ class YodhasMusicApp(App):
 
 if __name__ == "__main__":
     YodhasMusicApp().run()
-        
