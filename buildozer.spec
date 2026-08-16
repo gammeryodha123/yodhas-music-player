@@ -19,7 +19,7 @@ source.include_exts = py,png,jpg,kv,atlas,json
 version = 0.1
 
 # (list) Application requirements (Fixed dependencies for yt-dlp/HTTPS)
-requirequirements = python3,kivy,cython,yt_dlp,urllib3,certifi,openssl,requests
+requirements = python3,kivy,cython,yt_dlp,urllib3,certifi,openssl,requests,sqlite3,hostpython3
 
 
 # (str) Icon of the application
