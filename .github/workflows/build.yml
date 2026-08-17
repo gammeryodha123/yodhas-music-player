@@ -22,18 +22,25 @@ jobs:
       run: |
         sudo add-apt-repository universe -y
         sudo apt-get update
-        sudo apt-get install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo6 cmake libffi-dev libssl-dev ffmpeg android-sdk
-        pip install --upgrade pip
-        pip install "cython<3.0.0" buildozer kivy
+        sudo apt-get install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo6 cmake libffi-dev libssl-dev ffmpeg
+        pip install --upgrade pip setuptools wheel
+        pip install "cython<3.0.0" buildozer kivy yt-dlp
+
+    - name: Set up Buildozer
+      run: |
+        mkdir -p ~/.buildozer/android/platform/build-*
+        buildozer android debug --help || true
 
     - name: Build APK with Buildozer
       run: |
+        cd /home/runner/work/yodhas-music-player/yodhas-music-player
         buildozer android clean
-        yes | buildozer android debug
+        buildozer android debug
 
     - name: Upload APK Artifact
+      if: success()
       uses: actions/upload-artifact@v4
       with:
         name: yodhas-music-apk
         path: bin/*.apk
-        
+        retention-days: 30
