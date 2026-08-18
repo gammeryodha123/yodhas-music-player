@@ -22,9 +22,28 @@ jobs:
       run: |
         sudo add-apt-repository universe -y
         sudo apt-get update
-        sudo apt-get install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo6 cmake libffi-dev libssl-dev ffmpeg
+        sudo apt-get install -y git zip unzip curl openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo6 cmake libffi-dev libssl-dev ffmpeg
         pip install --upgrade pip setuptools wheel
         pip install "cython<3.0.0" buildozer kivy yt-dlp
+
+    - name: Install Android SDK command-line tools and platforms
+      env:
+        JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
+      run: |
+        set -e
+        export ANDROID_SDK_ROOT="$HOME/.buildozer/android/platform/android-sdk"
+        export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH"
+        mkdir -p "$ANDROID_SDK_ROOT"
+        # download Android command-line tools (update URL if Google changes it)
+        curl -fsSL -o cmdline.zip https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+        unzip -q cmdline.zip -d cmdline_tmp
+        mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools"
+        mv cmdline_tmp/cmdline-tools "$ANDROID_SDK_ROOT/cmdline-tools/latest"
+        rm -rf cmdline.zip cmdline_tmp
+        export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH"
+        # Accept licenses and install required SDK components (adjust api/build-tools versions to match buildozer.spec)
+        yes | sdkmanager --sdk_root="$ANDROID_SDK_ROOT" --licenses
+        sdkmanager --sdk_root="$ANDROID_SDK_ROOT" "platform-tools" "platforms;android-31" "build-tools;31.0.0"
 
     - name: Set up Buildozer
       run: |
