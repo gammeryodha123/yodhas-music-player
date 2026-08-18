@@ -20,11 +20,16 @@ jobs:
 
     - name: Install System Dependencies
       run: |
+        sudo apt-get update
+        sudo apt-get install -y git
         sudo add-apt-repository universe -y
         sudo apt-get update
-        sudo apt-get install -y git zip unzip curl openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo6 cmake libffi-dev libssl-dev ffmpeg
+        sudo apt-get install -y zip unzip curl openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo6 cmake libffi-dev libssl-dev ffmpeg
         pip install --upgrade pip setuptools wheel
         pip install "cython<3.0.0" buildozer kivy yt-dlp
+
+    - name: Verify Git Installation
+      run: git --version
 
     - name: Install Android SDK command-line tools and platforms
       env:
