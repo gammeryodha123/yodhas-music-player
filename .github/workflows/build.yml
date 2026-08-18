@@ -32,7 +32,6 @@ jobs:
         ANDROID_SDK_ROOT: /home/runner/.buildozer/android/platform/android-sdk
       run: |
         set -e
-        export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH"
         mkdir -p "$ANDROID_SDK_ROOT"
         # download Android command-line tools (update URL if Google changes it)
         curl -fsSL -o cmdline.zip https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
@@ -40,10 +39,9 @@ jobs:
         mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools"
         mv cmdline_tmp/cmdline-tools "$ANDROID_SDK_ROOT/cmdline-tools/latest"
         rm -rf cmdline.zip cmdline_tmp
-        export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH"
         # Accept licenses and install required SDK components (adjust api/build-tools versions to match buildozer.spec)
-        yes | sdkmanager --sdk_root="$ANDROID_SDK_ROOT" --licenses
-        sdkmanager --sdk_root="$ANDROID_SDK_ROOT" "platform-tools" "platforms;android-31" "build-tools;31.0.0"
+        yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root="$ANDROID_SDK_ROOT" --licenses
+        $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root="$ANDROID_SDK_ROOT" "platform-tools" "platforms;android-31" "build-tools;31.0.0"
 
     - name: Set up Buildozer
       run: |
@@ -54,8 +52,8 @@ jobs:
       env:
         JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
         ANDROID_SDK_ROOT: /home/runner/.buildozer/android/platform/android-sdk
+        PATH: /home/runner/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin:/home/runner/.buildozer/android/platform/android-sdk/platform-tools:$PATH
       run: |
-        export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH"
         cd /home/runner/work/yodhas-music-player/yodhas-music-player
         buildozer android clean
         buildozer android debug
@@ -67,4 +65,3 @@ jobs:
         name: yodhas-music-apk
         path: bin/*.apk
         retention-days: 30
-        
