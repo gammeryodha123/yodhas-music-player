@@ -38,17 +38,30 @@ jobs:
       run: |
         set -e
         mkdir -p "$ANDROID_SDK_ROOT"
-        # download Android command-line tools (update URL if Google changes it)
+        # download Android command-line tools
         curl -fsSL -o cmdline.zip https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
         unzip -q cmdline.zip -d cmdline_tmp
         mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools"
         mv cmdline_tmp/cmdline-tools "$ANDROID_SDK_ROOT/cmdline-tools/latest"
         rm -rf cmdline.zip cmdline_tmp
-        # Accept licenses and install required SDK components (adjust api/build-tools versions to match buildozer.spec)
+        # Accept licenses and install required SDK components (matching buildozer.spec: api=33, minapi=21)
         yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root="$ANDROID_SDK_ROOT" --licenses
-        $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root="$ANDROID_SDK_ROOT" "platform-tools" "platforms;android-31" "build-tools;31.0.0"
+        $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root="$ANDROID_SDK_ROOT" "platform-tools" "platforms;android-33" "build-tools;33.0.0"
+
+    - name: Install Android NDK
+      env:
+        ANDROID_SDK_ROOT: /home/runner/.buildozer/android/platform/android-sdk
+      run: |
+        # Install NDK r28c (required by p4a for Android builds)
+        mkdir -p /home/runner/.buildozer/android/platform
+        curl -fsSL -o ndk.zip https://dl.google.com/android/repository/android-ndk-r28c-linux.zip
+        unzip -q ndk.zip -d /home/runner/.buildozer/android/platform
+        rm ndk.zip
 
     - name: Set up Buildozer
+      env:
+        ANDROID_SDK_ROOT: /home/runner/.buildozer/android/platform/android-sdk
+        ANDROID_NDK_ROOT: /home/runner/.buildozer/android/platform/android-ndk-r28c
       run: |
         mkdir -p ~/.buildozer/android/platform/build-*
         buildozer android debug --help || true
@@ -57,9 +70,12 @@ jobs:
       env:
         JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
         ANDROID_SDK_ROOT: /home/runner/.buildozer/android/platform/android-sdk
-        PATH: /usr/bin:/bin:/home/runner/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin:/home/runner/.buildozer/android/platform/android-sdk/platform-tools:$PATH
+        ANDROID_NDK_ROOT: /home/runner/.buildozer/android/platform/android-ndk-r28c
+        PATH: /home/runner/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin:/home/runner/.buildozer/android/platform/android-sdk/platform-tools:/usr/bin:/bin:$PATH
       run: |
         which git
+        which sdkmanager
+        ls -la /home/runner/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager
         cd /home/runner/work/yodhas-music-player/yodhas-music-player
         buildozer android clean
         buildozer android debug
