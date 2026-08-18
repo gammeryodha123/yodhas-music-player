@@ -29,9 +29,9 @@ jobs:
     - name: Install Android SDK command-line tools and platforms
       env:
         JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
+        ANDROID_SDK_ROOT: /home/runner/.buildozer/android/platform/android-sdk
       run: |
         set -e
-        export ANDROID_SDK_ROOT="$HOME/.buildozer/android/platform/android-sdk"
         export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH"
         mkdir -p "$ANDROID_SDK_ROOT"
         # download Android command-line tools (update URL if Google changes it)
@@ -51,7 +51,11 @@ jobs:
         buildozer android debug --help || true
 
     - name: Build APK with Buildozer
+      env:
+        JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
+        ANDROID_SDK_ROOT: /home/runner/.buildozer/android/platform/android-sdk
       run: |
+        export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH"
         cd /home/runner/work/yodhas-music-player/yodhas-music-player
         buildozer android clean
         buildozer android debug
