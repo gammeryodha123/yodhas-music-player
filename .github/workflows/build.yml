@@ -57,8 +57,9 @@ jobs:
       env:
         JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
         ANDROID_SDK_ROOT: /home/runner/.buildozer/android/platform/android-sdk
-        PATH: /home/runner/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin:/home/runner/.buildozer/android/platform/android-sdk/platform-tools:$PATH
+        PATH: /usr/bin:/bin:/home/runner/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin:/home/runner/.buildozer/android/platform/android-sdk/platform-tools:$PATH
       run: |
+        which git
         cd /home/runner/work/yodhas-music-player/yodhas-music-player
         buildozer android clean
         buildozer android debug
