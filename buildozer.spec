@@ -35,7 +35,7 @@ fullscreen = 0
 android.permissions = INTERNET, READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE
 
 # (int) Target Android API
-android.api = 33
+android.api = 31
 
 # (int) Minimum API required
 android.minapi = 21
