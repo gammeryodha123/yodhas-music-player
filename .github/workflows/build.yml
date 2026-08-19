@@ -24,7 +24,11 @@ jobs:
         sudo apt-get install -y git
         sudo add-apt-repository universe -y
         sudo apt-get update
-        sudo apt-get install -y zip unzip curl openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo6 cmake libffi-dev libssl-dev ffmpeg
+        sudo apt-get install -y \
+          zip unzip curl openjdk-17-jdk python3-pip \
+          autoconf libtool libtool-bin m4 \
+          pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev \
+          libtinfo6 cmake libffi-dev libssl-dev ffmpeg
         pip install --upgrade pip setuptools wheel
         pip install "cython<3.0.0" buildozer kivy yt-dlp
 
