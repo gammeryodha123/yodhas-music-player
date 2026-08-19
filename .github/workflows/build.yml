@@ -65,12 +65,16 @@ jobs:
         unzip -q ndk.zip -d /home/runner/.buildozer/android/platform
         rm ndk.zip
 
-    - name: Initialize Autotools
+    - name: Initialize Autotools for libffi
       run: |
-        # Ensure libtool macros are available for libffi configuration
-        export ACLOCAL_PATH=/usr/share/aclocal
-        libtoolize --force --copy --verbose 2>/dev/null || true
-        autoreconf --install --force 2>/dev/null || true
+        # Fix: Install libtool m4 macros globally to make LT_SYS_SYMBOL_USCORE available
+        sudo libtoolize --force --install
+        
+        # Update autoconf macros
+        sudo autoupdate 2>/dev/null || true
+        
+        # Set ACLOCAL_PATH for autotools
+        export ACLOCAL_PATH=/usr/share/aclocal:/usr/share/libtool/m4
 
     - name: Set up Buildozer
       env:
@@ -86,7 +90,8 @@ jobs:
         ANDROID_SDK_ROOT: /home/runner/.buildozer/android/platform/android-sdk
         ANDROID_NDK_ROOT: /home/runner/.buildozer/android/platform/android-ndk-r28c
         PATH: /home/runner/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin:/home/runner/.buildozer/android/platform/android-sdk/platform-tools:/usr/bin:/bin:$PATH
-        ACLOCAL_PATH: /usr/share/aclocal
+        ACLOCAL_PATH: /usr/share/aclocal:/usr/share/libtool/m4
+        M4: /usr/bin/m4
       run: |
         which git
         which sdkmanager
