@@ -24,7 +24,7 @@ jobs:
         sudo apt-get install -y git
         sudo add-apt-repository universe -y
         sudo apt-get update
-        sudo apt-get install -y zip unzip curl openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo6 cmake libffi-dev libssl-dev ffmpeg
+        sudo apt-get install -y zip unzip curl openjdk-17-jdk python3-pip autoconf libtool libtool-bin pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo6 cmake libffi-dev libssl-dev ffmpeg
         pip install --upgrade pip setuptools wheel
         pip install "cython<3.0.0" buildozer kivy yt-dlp
 
@@ -69,8 +69,8 @@ jobs:
         # Update autoconf macros
         sudo autoupdate 2>/dev/null || true
         
-        # Set ACLOCAL_PATH for autotools
-        export ACLOCAL_PATH=/usr/share/aclocal:/usr/share/libtool/m4
+        # Set ACLOCAL_PATH globally across steps
+        echo "ACLOCAL_PATH=/usr/share/aclocal:/usr/share/libtool/m4" >> $GITHUB_ENV
 
     - name: Set up Buildozer
       env:
