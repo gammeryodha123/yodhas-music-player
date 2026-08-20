@@ -21,10 +21,9 @@ jobs:
     - name: Install System Dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y git
         sudo add-apt-repository universe -y
         sudo apt-get update
-        sudo apt-get install -y zip unzip curl openjdk-17-jdk python3-pip autoconf libtool libtool-bin pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo6 cmake libffi-dev libssl-dev ffmpeg
+        sudo apt-get install -y git zip unzip curl openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo6 cmake libffi-dev libssl-dev ffmpeg
         pip install --upgrade pip setuptools wheel
         pip install "cython<3.0.0" buildozer kivy yt-dlp
 
@@ -38,59 +37,35 @@ jobs:
       run: |
         set -e
         mkdir -p "$ANDROID_SDK_ROOT"
-        # download Android command-line tools
         curl -fsSL -o cmdline.zip https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
         unzip -q cmdline.zip -d cmdline_tmp
         mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools"
         mv cmdline_tmp/cmdline-tools "$ANDROID_SDK_ROOT/cmdline-tools/latest"
         rm -rf cmdline.zip cmdline_tmp
-        # Create symlink for buildozer compatibility
+        
+        # Symlink for buildozer compatibility
         mkdir -p "$ANDROID_SDK_ROOT/tools/bin"
         ln -sf "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" "$ANDROID_SDK_ROOT/tools/bin/sdkmanager"
-        # Accept licenses and install required SDK components (matching buildozer.spec: api=33, minapi=21)
+        
+        # Accept licenses and install required SDK components
         yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root="$ANDROID_SDK_ROOT" --licenses
         $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root="$ANDROID_SDK_ROOT" "platform-tools" "platforms;android-33" "build-tools;33.0.0"
 
-    - name: Install Android NDK
-      env:
-        ANDROID_SDK_ROOT: /home/runner/.buildozer/android/platform/android-sdk
+    - name: Install Compatible Android NDK (r25b)
       run: |
-        # Install NDK r28c (required by p4a for Android builds)
         mkdir -p /home/runner/.buildozer/android/platform
-        curl -fsSL -o ndk.zip https://dl.google.com/android/repository/android-ndk-r28c-linux.zip
+        curl -fsSL -o ndk.zip https://dl.google.com/android/repository/android-ndk-r25b-linux.zip
         unzip -q ndk.zip -d /home/runner/.buildozer/android/platform
+        mv /home/runner/.buildozer/android/platform/android-ndk-r25b /home/runner/.buildozer/android/platform/android-ndk
         rm ndk.zip
-
-    - name: Initialize Autotools for libffi
-      run: |
-        # Fix: Install libtool m4 macros globally to make LT_SYS_SYMBOL_USCORE available
-        sudo libtoolize --force --install
-        
-        # Update autoconf macros
-        sudo autoupdate 2>/dev/null || true
-        
-        # Set ACLOCAL_PATH globally across steps
-        echo "ACLOCAL_PATH=/usr/share/aclocal:/usr/share/libtool/m4" >> $GITHUB_ENV
-
-    - name: Set up Buildozer
-      env:
-        ANDROID_SDK_ROOT: /home/runner/.buildozer/android/platform/android-sdk
-        ANDROID_NDK_ROOT: /home/runner/.buildozer/android/platform/android-ndk-r28c
-      run: |
-        mkdir -p ~/.buildozer/android/platform/build-*
-        buildozer android debug --help || true
 
     - name: Build APK with Buildozer
       env:
         JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
         ANDROID_SDK_ROOT: /home/runner/.buildozer/android/platform/android-sdk
-        ANDROID_NDK_ROOT: /home/runner/.buildozer/android/platform/android-ndk-r28c
+        ANDROID_NDK_ROOT: /home/runner/.buildozer/android/platform/android-ndk
         PATH: /home/runner/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin:/home/runner/.buildozer/android/platform/android-sdk/platform-tools:/usr/bin:/bin:$PATH
       run: |
-        which git
-        which sdkmanager
-        ls -la /home/runner/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager
-        cd /home/runner/work/yodhas-music-player/yodhas-music-player
         buildozer android clean
         buildozer android debug
 
