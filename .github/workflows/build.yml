@@ -61,6 +61,17 @@ jobs:
         unzip -q ndk.zip -d /home/runner/.buildozer/android/platform
         rm ndk.zip
 
+    - name: Initialize Autotools for libffi
+      run: |
+        # Fix: Install libtool m4 macros globally to make LT_SYS_SYMBOL_USCORE available
+        sudo libtoolize --force --install
+        
+        # Update autoconf macros
+        sudo autoupdate 2>/dev/null || true
+        
+        # Set ACLOCAL_PATH for autotools
+        export ACLOCAL_PATH=/usr/share/aclocal:/usr/share/libtool/m4
+
     - name: Set up Buildozer
       env:
         ANDROID_SDK_ROOT: /home/runner/.buildozer/android/platform/android-sdk
@@ -90,3 +101,4 @@ jobs:
         name: yodhas-music-apk
         path: bin/*.apk
         retention-days: 30
+        
