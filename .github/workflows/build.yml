@@ -30,7 +30,7 @@ jobs:
     - name: Verify Git Installation
       run: git --version
 
-    - name: Install Android SDK command-line tools and platforms
+    - name: Install Android SDK command-line tools
       env:
         JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
         ANDROID_SDK_ROOT: /home/runner/.buildozer/android/platform/android-sdk
@@ -43,21 +43,26 @@ jobs:
         mv cmdline_tmp/cmdline-tools "$ANDROID_SDK_ROOT/cmdline-tools/latest"
         rm -rf cmdline.zip cmdline_tmp
         
-        # Symlink for buildozer compatibility
+        # Create compatibility symlink for sdkmanager
         mkdir -p "$ANDROID_SDK_ROOT/tools/bin"
         ln -sf "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" "$ANDROID_SDK_ROOT/tools/bin/sdkmanager"
         
-        # Accept licenses and install required SDK components
+        # Accept licenses and install platform components
         yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root="$ANDROID_SDK_ROOT" --licenses
         $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root="$ANDROID_SDK_ROOT" "platform-tools" "platforms;android-33" "build-tools;33.0.0"
 
-    - name: Install Compatible Android NDK (r25b)
+    - name: Install Android NDK (r25b)
       run: |
         mkdir -p /home/runner/.buildozer/android/platform
         curl -fsSL -o ndk.zip https://dl.google.com/android/repository/android-ndk-r25b-linux.zip
         unzip -q ndk.zip -d /home/runner/.buildozer/android/platform
         mv /home/runner/.buildozer/android/platform/android-ndk-r25b /home/runner/.buildozer/android/platform/android-ndk
         rm ndk.zip
+
+    - name: Pre-clone python-for-android
+      run: |
+        mkdir -p .buildozer/android/platform
+        git clone https://github.com/kivy/python-for-android.git .buildozer/android/platform/python-for-android
 
     - name: Build APK with Buildozer
       env:
@@ -66,8 +71,7 @@ jobs:
         ANDROID_NDK_ROOT: /home/runner/.buildozer/android/platform/android-ndk
         PATH: /home/runner/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin:/home/runner/.buildozer/android/platform/android-sdk/platform-tools:/usr/bin:/bin:$PATH
       run: |
-        buildozer android clean
-        buildozer android debug
+        buildozer -v android debug
 
     - name: Upload APK Artifact
       if: success()
